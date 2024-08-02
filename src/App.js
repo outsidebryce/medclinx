@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'; // Import these components
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth, provider } from './firebaseConfig';
@@ -28,6 +29,9 @@ function App() {
 
   return (
     <div className="App">
+      <Helmet>
+            <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <button onClick={handleGoogleSignIn}>Sign in with Google</button>
       <LoadScript googleMapsApiKey="AIzaSyBBCi4IXGJ9jnvUFlYbyLNOj4y3MGoHfRo">
         <GoogleMap
