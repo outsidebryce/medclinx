@@ -41,11 +41,13 @@ function App() {
   return (
     <div className="App">
       <Helmet>
+        <title>MedClinx</title>
         <meta name="robots" content="noindex, nofollow" />
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
         />
+        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
       </Helmet>
 
       <Navbar bg="light" expand="lg" className="fixed-top justify-content-center">
