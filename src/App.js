@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth, provider } from './firebaseConfig';
 import MedicalProfile from './MedicalProfile';
 import { Navbar, Nav } from 'react-bootstrap';
-import logo from './logo.svg'; // Added this import
+import logo from './logo.svg';
+import './App.css'; // Added this line to import the CSS file
 
 const containerStyle = {
   width: '100%',
@@ -23,7 +24,10 @@ const mapContainerStyle = {
   right: 0,
   width: '50vw',
   height: '100vh',
-  zIndex: 1000
+  zIndex: 1000,
+  '@media (max-width: 768px)': {
+    display: 'none',
+  },
 };
 
 function App() {
@@ -36,6 +40,14 @@ function App() {
       .catch((error) => {
         console.error(error);
       });
+  };
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    // Implement search functionality here
+    console.log('Searching for:', searchTerm);
   };
 
   return (
@@ -77,11 +89,25 @@ function App() {
 
       <div style={{ paddingTop: '56px' }}></div>
 
-      <div className="d-flex">
-        <div className="w-50 p-4">
-          <MedicalProfile />
+      <div className="d-flex flex-column flex-md-row clinics">
+        <div className="w-50 w-md-50 p-4">
+          <form onSubmit={handleSearch} className="mb-3">
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search medical profiles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="btn btn-primary" type="submit">Search</button>
+            </div>
+          </form>
+          <div className="medical-profile-container">
+            <MedicalProfile />
+          </div>
         </div>
-        <div style={mapContainerStyle}>
+        <div style={mapContainerStyle} className="d-none d-md-block">
           <LoadScript googleMapsApiKey="AIzaSyBBCi4IXGJ9jnvUFlYbyLNOj4y3MGoHfRo">
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '100%' }}
