@@ -1,8 +1,0 @@
-/* Existing styles */
-
-/* Tablet and Mobile styles */
-@media (max-width: 991px) {
-  .clinics .w-50 {
-    width: 100% !important;
-  }
-}
