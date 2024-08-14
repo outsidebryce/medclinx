@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import Navbar from './Navbar';
 
-// Create a theme instance.
 const theme = createTheme({
   typography: {
     fontFamily: 'Inter, sans-serif',
@@ -10,8 +14,18 @@ const theme = createTheme({
 });
 
 function Home() {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const categories = [
+    { name: 'General', icon: <LocalHospitalIcon /> },
+    { name: 'Specialist', icon: <MedicalServicesIcon /> },
+    { name: 'Mental Health', icon: <PsychologyIcon /> },
+    { name: 'Wellness', icon: <FitnessCenterIcon /> },
+  ];
+
   return (
     <ThemeProvider theme={theme}>
+      <Navbar transparent={true} />
       <Box
         sx={{
           height: '70vh',
@@ -19,12 +33,13 @@ function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           position: 'relative',
+          marginTop: '-100px', // Move the masthead up
+          paddingTop: '100px', // Add padding to compensate for the navbar
         }}
       >
-        {/* Search Container */}
         <Box
           sx={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)', // 90% opacity white
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
             padding: 3,
             borderRadius: 2,
             width: '80%',
@@ -35,7 +50,7 @@ function Home() {
             position: 'absolute',
             top: '50%',
             left: '40px',
-            transform: 'translate(0, -50%)',
+            transform: 'translate(0%, -50%)',
           }}
         >
           <Typography 
@@ -50,6 +65,44 @@ function Home() {
             Find Your <span style={{ color: '#0140FD' }}>Balance</span>
           </Typography>
           
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            {categories.map((category) => (
+              <Button
+                key={category.name}
+                onClick={() => setSelectedCategory(category.name)}
+                sx={{
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: selectedCategory === category.name ? '#E3F2FD' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: '#DFDFDF',
+                  },
+                }}
+              >
+                <Box 
+                  sx={{ 
+                    mb: 1, 
+                    color: selectedCategory === category.name ? '#0140FD' : '#8F8F8F',
+                  }}
+                >
+                  {category.icon}
+                </Box>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: selectedCategory === category.name ? '#0140FD' : '#8F8F8F',
+                    textTransform: 'none',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {category.name}
+                </Typography>
+              </Button>
+            ))}
+          </Box>
+
           <TextField
             fullWidth
             variant="outlined"
@@ -95,10 +148,8 @@ function Home() {
         </Box>
       </Box>
       
-      {/* Rest of your homepage content */}
       <Box sx={{ p: 3 }}>
         <Typography variant="h4">About MedClinx</Typography>
-        {/* Add more content here */}
       </Box>
     </ThemeProvider>
   );

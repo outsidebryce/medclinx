@@ -3,19 +3,20 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Box from '@mui/material/Box';
 
-function Navbar() {
+function Navbar({ transparent }) {
   return (
     <AppBar 
       position="fixed" 
-      color="primary" 
-      elevation={1}
+      color="transparent" 
+      elevation={0}
       sx={{
-        backgroundColor: '#FAFAFA',
-        boxShadow: '0px 1px 5px rgba(0, 0, 0, 0.1)'
+        backgroundColor: 'transparent !important',
+        boxShadow: 'none',
       }}
     >
       <Toolbar>
@@ -34,7 +35,7 @@ function Navbar() {
           target="_blank"
           rel="noopener noreferrer"
           sx={{
-            color: '#080808',
+            color: 'white',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
@@ -45,16 +46,35 @@ function Navbar() {
           }}
         >
           For Clinics
-          <OpenInNewIcon sx={{ fontSize: 16, marginLeft: 0.5 }} />
+          
         </Link>
-        <IconButton
-          size="large"
-          edge="start"
-          aria-label="menu"
-          sx={{ color: '#080808' }}
+        <Box
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '20px', // Adjust for desired roundness
+            display: 'flex',
+            padding: '4px 8px', // Adjust padding as needed
+            '&:hover': {
+              backgroundColor: '#f5f5f5', // Light grey on hover
+            },
+          }}
         >
-          <MenuIcon />
-        </IconButton>
+          
+          <IconButton
+            size="small"
+            aria-label="menu"
+            sx={{ color: '#080808', padding: '4px' }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="profile"
+            sx={{ color: '#080808', padding: '4px' }}
+          >
+            <AccountCircleIcon />
+          </IconButton>
+        </Box>
       </Toolbar>
     </AppBar>
   );
