@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
@@ -15,6 +15,8 @@ const theme = createTheme({
 
 function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [mastheadHeight, setMastheadHeight] = useState('auto');
+  const searchContainerRef = useRef(null);
 
   const categories = [
     { name: 'General', icon: <LocalHospitalIcon /> },
@@ -23,22 +25,39 @@ function Home() {
     { name: 'Wellness', icon: <FitnessCenterIcon /> },
   ];
 
+  useEffect(() => {
+    const updateMastheadHeight = () => {
+      if (window.innerWidth < 600 && searchContainerRef.current) {
+        const searchContainerHeight = searchContainerRef.current.offsetHeight;
+        setMastheadHeight(`${searchContainerHeight + 120}px`);
+      } else {
+        setMastheadHeight('auto');
+      }
+    };
+
+    updateMastheadHeight();
+    window.addEventListener('resize', updateMastheadHeight);
+
+    return () => window.removeEventListener('resize', updateMastheadHeight);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <Navbar transparent={true} />
       <Box
         sx={{
-          height: { xs: '80vh', sm: 'auto', lg: '80vh' },
-          minHeight: { sm: '80vh' },
+          height: { xs: mastheadHeight, sm: 'auto' },
+          minHeight: { sm: '100vh' },
           backgroundImage: 'url("/medclinx-masthead.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           position: 'relative',
-          marginTop: { xs: '-80px', md: '-100px' },
-          paddingTop: { xs: '60px', md: '100px' },
+          paddingTop: { xs: '150px', sm: '100px' },
+          marginTop: { xs: '-80px' },
         }}
       >
         <Box
+          ref={searchContainerRef}
           sx={{
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
             padding: 3,
@@ -49,12 +68,12 @@ function Home() {
             flexDirection: 'column',
             gap: 2,
             position: 'absolute',
-            top: { xs: '50%', sm: '50%' },
+            top: { xs: '100px', sm: '50%' },
             left: { xs: '20px', sm: '40px' },
-            transform: { xs: 'translateY(-50%)', sm: 'translateY(-50%)' },
+            transform: { xs: 'none', sm: 'translateY(-50%)' },
             margin: { xs: '0 auto', sm: 0 },
             right: { xs: '20px', sm: 'auto' },
-            height: { sm: 'auto' },
+            height: { xs: 'auto', sm: 'auto' },
             overflowY: { xs: 'auto', sm: 'visible' },
           }}
         >
