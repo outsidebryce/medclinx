@@ -28,13 +28,14 @@ function Home() {
       <Navbar transparent={true} />
       <Box
         sx={{
-          height: '70vh',
+          height: { xs: '80vh', sm: 'auto', lg: '80vh' },
+          minHeight: { sm: '80vh' },
           backgroundImage: 'url("/medclinx-masthead.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           position: 'relative',
-          marginTop: '-100px', // Move the masthead up
-          paddingTop: '100px', // Add padding to compensate for the navbar
+          marginTop: { xs: '-80px', md: '-100px' },
+          paddingTop: { xs: '60px', md: '100px' },
         }}
       >
         <Box
@@ -42,15 +43,19 @@ function Home() {
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
             padding: 3,
             borderRadius: 2,
-            width: '80%',
+            width: { xs: 'calc(100% - 40px)', sm: '80%' },
             maxWidth: '520px',
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
             position: 'absolute',
-            top: '50%',
-            left: '40px',
-            transform: 'translate(0%, -50%)',
+            top: { xs: '50%', sm: '50%' },
+            left: { xs: '20px', sm: '40px' },
+            transform: { xs: 'translateY(-50%)', sm: 'translateY(-50%)' },
+            margin: { xs: '0 auto', sm: 0 },
+            right: { xs: '20px', sm: 'auto' },
+            height: { sm: 'auto' },
+            overflowY: { xs: 'auto', sm: 'visible' },
           }}
         >
           <Typography 
