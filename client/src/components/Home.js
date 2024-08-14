@@ -47,7 +47,7 @@ function Home() {
       <Box
         sx={{
           height: { xs: mastheadHeight, sm: 'auto' },
-          minHeight: { sm: '100vh' },
+          minHeight: { sm: '80vh' },
           backgroundImage: 'url("/medclinx-masthead.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
