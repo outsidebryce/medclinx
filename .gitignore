@@ -27,3 +27,7 @@ yarn-error.log*
 
 # Production build
 /client/build
+
+node_modules/
+.cache/
+*.pack
