@@ -4,7 +4,7 @@ function Home() {
   console.log('Home component rendered');
   return (
     <div>
-      <h1>Welcome to Medical Clinics</h1>
+      <h1>Welcome to MedClinx</h1>
     </div>
   );
 }
