@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { 
@@ -21,6 +21,7 @@ function ClinicListings() {
   const [error, setError] = useState(null);
   const [specialties, setSpecialties] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
+  const filterBarRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,6 +76,14 @@ function ClinicListings() {
   const handleSpecialtyChange = (event, newSpecialty) => {
     if (newSpecialty !== null) {
       setSelectedSpecialty(newSpecialty);
+      
+      // Scroll the selected option into view
+      const filterBar = filterBarRef.current;
+      const selectedButton = filterBar.querySelector(`[value="${newSpecialty}"]`);
+      if (selectedButton) {
+        const scrollLeft = selectedButton.offsetLeft - filterBar.offsetLeft;
+        filterBar.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      }
     }
   };
 
@@ -99,18 +108,29 @@ function ClinicListings() {
   return (
     <>
       {/* Fixed Filter Bar */}
-      <Box sx={{ 
-        position: 'fixed', 
-        top: '64px', // Adjust this value based on your navbar height
-        left: 0,
-        right: 0,
-        zIndex: 1100,
-        backgroundColor: 'background.paper',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        padding: '0px 16px 16px 16px', // Updated padding
-        overflowX: 'auto'
-      }}>
+      <Box 
+        ref={filterBarRef}
+        sx={{ 
+          position: 'fixed', 
+          top: '64px', // Adjust this value based on your navbar height
+          left: 0,
+          right: 0,
+          zIndex: 1100,
+          backgroundColor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          padding: {
+            xs: '10px 16px 16px 16px',
+            sm: '0px 16px 16px 16px'
+          },
+          overflowX: 'auto',
+          scrollbarWidth: 'none', // Hide scrollbar for Firefox
+          '&::-webkit-scrollbar': { // Hide scrollbar for Chrome, Safari, and Opera
+            display: 'none'
+          },
+          '-ms-overflow-style': 'none', // Hide scrollbar for IE and Edge
+        }}
+      >
         <ToggleButtonGroup
           value={selectedSpecialty}
           exclusive
@@ -119,6 +139,14 @@ function ClinicListings() {
           sx={{
             display: 'flex',
             flexWrap: 'nowrap',
+            '& .MuiToggleButton-root': {
+              flex: '1 0 auto',
+              whiteSpace: 'nowrap',
+              minWidth: {
+                xs: '110px', // Fixed width on mobile
+                sm: 'auto'   // Auto width on larger screens
+              },
+            },
           }}
         >
           {specialties.map((specialty) => (
@@ -128,7 +156,6 @@ function ClinicListings() {
               sx={{
                 flexDirection: 'column',
                 padding: '8px',
-                width: '110px',
                 '&.Mui-selected': {
                   backgroundColor: 'primary.main',
                   color: 'primary.contrastText',
@@ -170,19 +197,25 @@ function ClinicListings() {
             <Card key={clinic.id} sx={{ mb: 2, display: 'flex', position: 'relative' }}>
               {clinic.logo && (
                 <Box sx={{ 
-                  padding: '10px',
+                  padding: { xs: '5px', sm: '10px' },
                   border: 'solid 1px rgba(0, 0, 0, .2)',
-                  margin: '10px',
+                  margin: { 
+                    xs: '20px 5px 5px 20px', 
+                    sm: '10px'
+                  },
                   borderRadius: '4px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  width: { xs: 60, sm: 120 },
+                  height: { xs: 60, sm: 120 },
+                  flexShrink: 0,
                 }}>
                   <CardMedia
                     component="img"
                     sx={{ 
-                      width: 100, 
-                      height: 100, 
+                      width: { xs: 50, sm: 100 }, 
+                      height: { xs: 50, sm: 100 }, 
                       objectFit: 'contain'
                     }}
                     image={clinic.logo}
