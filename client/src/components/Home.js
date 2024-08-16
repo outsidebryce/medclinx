@@ -6,6 +6,7 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import Navbar from './Navbar';
+import { Link } from 'react-router-dom';
 
 const theme = createTheme({
   typography: {
@@ -156,6 +157,8 @@ function Home() {
             </Select>
           </FormControl>
           <Button 
+            component={Link}
+            to="/clinics"
             variant="contained" 
             size="large"
             sx={{ 

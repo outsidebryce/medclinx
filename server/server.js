@@ -1,4 +1,5 @@
 require('dotenv').config();
+const medicalProfileController = require('./controllers/medicalProfileController');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -7,7 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const initializeFirebase = require('./firebaseInit');
+const { supabaseAdmin } = require('./supabaseAdmin');
 
 console.log('Current working directory:', process.cwd());
 console.log('__dirname:', __dirname);
@@ -19,9 +20,6 @@ console.log('Env file exists:', fs.existsSync(envPath));
 require('dotenv').config({ path: envPath });
 
 console.log('PORT:', process.env.PORT);
-
-// Initialize Firebase
-const db = initializeFirebase();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,21 +42,105 @@ app.get('/', (req, res) => {
   });
 
 
+// Define verifyToken middleware
+const verifyToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin.auth.getUser(token);
+    if (error) throw error;
+    req.user = data.user;
+    next();
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
 // Routes
 app.use('/api/clinics', require('./routes/clinics'));
-app.use('/api/medical-profiles', require('./routes/medicalProfileRoutes'));
+app.post('/api/medical-profiles', verifyToken, medicalProfileController.createProfile);
+app.get('/api/medical-profiles', verifyToken, medicalProfileController.getAllProfiles);
+app.get('/api/medical-profiles/:id', verifyToken, medicalProfileController.getProfileById);
+app.put('/api/medical-profiles/:id', verifyToken, medicalProfileController.updateProfile);
+app.delete('/api/medical-profiles/:id', verifyToken, medicalProfileController.deleteProfile);
 
+// POST /api/clinics
 app.post('/api/clinics', async (req, res) => {
-    try {
-      const { name, address } = req.body;
-      // Here, you would typically save this data to your database
-      // For now, let's just send back the received data
-      res.status(201).json({ message: 'Clinic created', clinic: { name, address } });
-    } catch (error) {
-      console.error('Error creating clinic:', error);
-      res.status(500).json({ message: 'Error creating clinic' });
+  try {
+    const { name, address } = req.body;
+    const { data, error } = await supabaseAdmin
+      .from('clinics')
+      .insert({ name, address })
+      .select();
+
+    if (error) throw error;
+    res.status(201).json({ message: 'Clinic created', clinic: data[0] });
+  } catch (error) {
+    console.error('Error creating clinic:', error);
+    res.status(500).json({ message: 'Error creating clinic' });
+  }
+});
+
+// GET a specific clinic by ID
+app.get('/api/clinics/:id', async (req, res) => {
+  try {
+    const clinicId = req.params.id;
+    const { data, error } = await supabaseAdmin
+      .from('clinics')
+      .select('*')
+      .eq('id', clinicId)
+      .single();
+
+    if (error) throw error;
+    
+    if (data) {
+      res.json(data);
+    } else {
+      res.status(404).json({ message: 'Clinic not found' });
     }
-  });
+  } catch (error) {
+    console.error('Error fetching clinic:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/auth/login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (error) throw error;
+
+    res.json({ user: data.user, session: data.session });
+  } catch (error) {
+    console.error('Error in login:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET all clinics
+app.get('/api/clinics', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('clinics')
+      .select('*');
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching clinics:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
@@ -74,133 +156,6 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something went wrong!');
 });
 
-// GET a specific clinic by ID
-app.get('/api/clinics/:id', async (req, res) => {
-    try {
-      const clinicId = req.params.id;
-      // Here you would typically fetch the clinic from your database
-      // For now, let's return a mock response
-      const clinic = {
-        id: clinicId,
-        name: `Clinic ${clinicId}`,
-        address: `${clinicId}23 Main St`
-      };
-      
-      if (clinic) {
-        res.json(clinic);
-      } else {
-        res.status(404).json({ message: 'Clinic not found' });
-      }
-    } catch (error) {
-      console.error('Error fetching clinic:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
-
-  // POST /api/auth/login
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Here you would typically fetch the user from your database
-    // For this example, we'll use a mock user
-    const user = {
-      id: '1',
-      email: 'user@example.com',
-      password: '$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' // hashed password
-    };
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const payload = {
-      user: {
-        id: user.id
-      }
-    };
-
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      }
-    );
-  } catch (error) {
-    console.error('Error in login:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// POST /api/auth/login
-app.post('/api/auth/login', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      // Here you would typically fetch the user from your database
-      // For this example, we'll use a mock user
-      const user = {
-        id: '1',
-        email: 'user@example.com',
-        password: '$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' // hashed password
-      };
-  
-      if (!user) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-  
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
-  
-      const payload = {
-        user: {
-          id: user.id
-        }
-      };
-  
-      jwt.sign(
-        payload,
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
-    } catch (error) {
-      console.error('Error in login:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-// GET all clinics
-app.get('/api/clinics', async (req, res) => {
-    try {
-      // Here you would typically fetch clinics from your database
-      // For now, let's return a mock response
-      const clinics = [
-        { id: 1, name: 'Clinic A', address: '123 Main St' },
-        { id: 2, name: 'Clinic B', address: '456 Elm St' },
-      ];
-      res.json(clinics);
-    } catch (error) {
-      console.error('Error fetching clinics:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });

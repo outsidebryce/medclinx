@@ -7,6 +7,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Box from '@mui/material/Box';
+import { Link as RouterLink } from 'react-router-dom';
 
 function Navbar({ transparent }) {
   return (
@@ -21,14 +22,16 @@ function Navbar({ transparent }) {
     >
       <Toolbar>
         <Box sx={{ flexGrow: 1 }}>
-          <img 
-            src="/medclinx-logo.svg" 
-            alt="MedClinx Logo" 
-            style={{ 
-              maxHeight: '30px', 
-              width: 'auto'
-            }}
-          />
+          <RouterLink to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+            <img 
+              src="/medclinx-logo.svg" 
+              alt="MedClinx Logo" 
+              style={{ 
+                maxHeight: '30px', 
+                width: 'auto'
+              }}
+            />
+          </RouterLink>
         </Box>
         <Link
           href="https://example.com/for-clinics"

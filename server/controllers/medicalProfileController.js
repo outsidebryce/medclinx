@@ -1,34 +1,75 @@
 const MedicalProfile = require('../models/MedicalProfile');
 
-exports.createProfile = async (req, res) => {
-  try {
-    const newProfile = await MedicalProfile.create(req.body);
-    res.status(201).json(newProfile);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+const medicalProfileController = {
+  // Create a new medical profile
+  createProfile: async (req, res) => {
+    try {
+      const profile = await MedicalProfile.create(req.body);
+      res.status(201).json({ message: 'Profile created successfully', profile });
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      res.status(500).json({ message: 'Error creating profile', error: error.message });
+    }
+  },
+
+  // Get all medical profiles
+  getAllProfiles: async (req, res) => {
+    try {
+      const profiles = await MedicalProfile.getAll();
+      res.status(200).json(profiles);
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+      res.status(500).json({ message: 'Error fetching profiles', error: error.message });
+    }
+  },
+
+  // Get a single medical profile by ID
+  getProfileById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const profile = await MedicalProfile.get(id);
+      if (profile) {
+        res.status(200).json(profile);
+      } else {
+        res.status(404).json({ message: 'Profile not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      res.status(500).json({ message: 'Error fetching profile', error: error.message });
+    }
+  },
+
+  // Update a medical profile
+  updateProfile: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const profile = await MedicalProfile.update(id, req.body);
+      if (profile) {
+        res.status(200).json({ message: 'Profile updated successfully', profile });
+      } else {
+        res.status(404).json({ message: 'Profile not found' });
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      res.status(500).json({ message: 'Error updating profile', error: error.message });
+    }
+  },
+
+  // Delete a medical profile
+  deleteProfile: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await MedicalProfile.delete(id);
+      if (deleted) {
+        res.status(200).json({ message: 'Profile deleted successfully' });
+      } else {
+        res.status(404).json({ message: 'Profile not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      res.status(500).json({ message: 'Error deleting profile', error: error.message });
+    }
   }
 };
 
-exports.getProfile = async (req, res) => {
-  try {
-    const profile = await MedicalProfile.get(req.params.patientId);
-    if (!profile) {
-      return res.status(404).json({ message: 'Profile not found' });
-    }
-    res.json(profile);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.updateProfile = async (req, res) => {
-  try {
-    const updatedProfile = await MedicalProfile.update(req.params.patientId, req.body);
-    if (!updatedProfile) {
-      return res.status(404).json({ message: 'Profile not found' });
-    }
-    res.json(updatedProfile);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+module.exports = medicalProfileController;

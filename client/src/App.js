@@ -6,6 +6,8 @@ import Toolbar from '@mui/material/Toolbar';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
+import ClinicListings from './components/ClinicListings';
+import ClinicProfile from './components/ClinicProfile';
 
 const theme = createTheme({
   palette: {
@@ -25,10 +27,11 @@ function App() {
       <Router>
         <Box sx={{ flexGrow: 1 }}>
           <Navbar />
-          <Toolbar /> {/* This empty Toolbar acts as a spacer */}
+          <Toolbar />
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* Add other routes here */}
+            <Route path="/clinics" element={<ClinicListings />} />
+            <Route path="/clinic/:slug" element={<ClinicProfile />} />
           </Routes>
         </Box>
       </Router>

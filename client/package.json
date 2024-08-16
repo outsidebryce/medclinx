@@ -14,7 +14,7 @@
     "react-scripts": "4.0.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "REACT_APP_SUPABASE_URL=https://iqvqhoohzezzeurbgfoi.supabase.co REACT_APP_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxdnFob29oemV6emV1cmJnZm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjM2MDc4NzUsImV4cCI6MjAzOTE4Mzg3NX0.3_Rl34Ljpe5SnkIFIdOH_NRtSAMsRcoMqz1ZXtNYcro react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

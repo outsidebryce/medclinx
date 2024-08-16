@@ -1,30 +1,63 @@
-const initializeFirebase = require('../firebaseInit');
-const db = initializeFirebase();
+const { supabaseAdmin } = require('../supabaseAdmin');
 
 class MedicalProfile {
   static async create(data) {
-    const docRef = await db.collection('medicalProfiles').add(data);
-    return { id: docRef.id, ...data };
+    const { data: profile, error } = await supabaseAdmin
+      .from('medical_profiles')
+      .insert([data])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return profile;
   }
 
-  static async get(patientId) {
-    const snapshot = await db.collection('medicalProfiles').where('patientId', '==', patientId).get();
-    if (snapshot.empty) {
-      return null;
+  static async get(id) {
+    const { data: profile, error } = await supabaseAdmin
+      .from('medical_profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+  
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows returned
+      throw error;
     }
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+    return profile;
   }
 
-  static async update(patientId, data) {
-    const snapshot = await db.collection('medicalProfiles').where('patientId', '==', patientId).get();
-    if (snapshot.empty) {
-      return null;
+  static async update(id, data) {
+    const { data: profile, error } = await supabaseAdmin
+      .from('medical_profiles')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows returned
+      throw error;
     }
-    const doc = snapshot.docs[0];
-    await doc.ref.update(data);
-    const updatedDoc = await doc.ref.get();
-    return { id: updatedDoc.id, ...updatedDoc.data() };
+    return profile;
+  }
+
+  static async delete(id) {
+    const { error } = await supabaseAdmin
+      .from('medical_profiles')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  }
+
+  static async getAll() {
+    const { data: profiles, error } = await supabaseAdmin
+      .from('medical_profiles')
+      .select('*');
+
+    if (error) throw error;
+    return profiles;
   }
 }
 
