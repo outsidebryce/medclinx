@@ -112,7 +112,10 @@ function ClinicListings() {
         ref={filterBarRef}
         sx={{ 
           position: 'fixed', 
-          top: '64px', // Adjust this value based on your navbar height
+          top: {
+            xs: '56px', // Mobile navbar height
+            sm: '64px'  // Desktop navbar height
+          },
           left: 0,
           right: 0,
           zIndex: 1100,
