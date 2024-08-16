@@ -123,7 +123,7 @@ function ClinicListings() {
           borderBottom: '1px solid',
           borderColor: 'divider',
           padding: {
-            xs: '10px 16px 16px 16px',
+            xs: '16px 16px 16px 16px',
             sm: '0px 16px 16px 16px'
           },
           overflowX: 'auto',

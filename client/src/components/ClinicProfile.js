@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Box, Typography, CircularProgress, Paper, Grid } from '@mui/material';
+import { 
+  Box, Typography, CircularProgress, Paper, Grid, Container, 
+  Button, Avatar, Card, CardContent, Divider, Rating, List, ListItem, ListItemText,
+  useTheme, useMediaQuery
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ShareIcon from '@mui/icons-material/Share';
+import MessageIcon from '@mui/icons-material/Message';
 
 function ClinicProfile() {
   const { slug } = useParams();
   const [clinic, setClinic] = useState(null);
   const [error, setError] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     async function fetchClinic() {
@@ -15,7 +24,7 @@ function ClinicProfile() {
 
         const { data, error } = await supabase
           .from('clinics')
-          .select('*')
+          .select('*, logo')
           .or(`name.ilike.%${nameQuery}%,name.ilike.%${nameQuery.replace(/\band\b/g, '&')}%`)
           .single();
 
@@ -35,23 +44,212 @@ function ClinicProfile() {
   if (!clinic) return <Box><CircularProgress /></Box>;
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h4" gutterBottom>{clinic.name}</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Phone:</strong> {clinic.phone_number}</Typography>
-            <Typography><strong>Location:</strong> {clinic.city}, {clinic.state} {clinic.zipcode}</Typography>
-            <Typography><strong>Website:</strong> {clinic.website}</Typography>
+    <Container 
+      maxWidth="lg" 
+      sx={{ 
+        mt: { xs: 0, sm: '20px' }, 
+        px: { xs: 0, sm: 2 },
+        bgcolor: '#FAFAFA',
+        minHeight: '100vh'
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ 
+        bgcolor: '#002BAA', 
+        color: 'white', 
+        p: 2, 
+        mb: 2, 
+        position: 'relative',
+        borderRadius: { xs: 0, sm: '4px' }  // Add border radius for desktop
+      }}>
+        <Button 
+          component={Link} 
+          to="/clinics" 
+          startIcon={<ArrowBackIcon />} 
+          color="inherit"
+          sx={{ textTransform: 'capitalize' }}
+        >
+          Back
+        </Button>
+        {isMobile && (
+          <Button 
+            startIcon={<ShareIcon />} 
+            color="inherit"
+            sx={{ 
+              textTransform: 'capitalize',
+              position: 'absolute',
+              top: 16,
+              right: 16
+            }}
+          >
+            Share
+          </Button>
+        )}
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+          <Avatar 
+            src={clinic.logo} 
+            alt={`${clinic.name} logo`}
+            sx={{ width: 60, height: 60, mr: 2 }}
+          >
+            {clinic.name.charAt(0)}
+          </Avatar>
+          <Box>
+            <Typography variant="h5">{clinic.name}</Typography>
+            <Typography variant="subtitle1">{clinic.city}, {clinic.state}</Typography>
+            <Typography variant="subtitle2">{clinic.phone_number}</Typography>
+          </Box>
+        </Box>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          mt: 2,
+          flexDirection: { xs: 'column', sm: 'row' }
+        }}>
+          {!isMobile && (
+            <Button 
+              startIcon={<ShareIcon />} 
+              color="inherit"
+              sx={{ textTransform: 'capitalize' }}
+            >
+              Share
+            </Button>
+          )}
+          <Button 
+            startIcon={<MessageIcon />} 
+            variant="outlined" 
+            sx={{ 
+              mx: { xs: 0, sm: 1 }, 
+              mb: { xs: 1, sm: 0 },
+              textTransform: 'capitalize',
+              color: 'white',
+              borderColor: 'white',
+              '&:hover': {
+                borderColor: 'white',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)'
+              },
+              width: { xs: '100%', sm: 'auto' }
+            }}
+          >
+            Message
+          </Button>
+          <Button 
+            variant="contained" 
+            href={clinic.website} 
+            target="_blank"
+            sx={{ 
+              bgcolor: '#DB2777', 
+              color: 'white',
+              '&:hover': { bgcolor: '#BE185D' }, 
+              textTransform: 'capitalize',
+              width: { xs: '100%', sm: 'auto' }
+            }}
+          >
+            Visit website
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Content below header */}
+      <Box sx={{ px: { xs: '20px', sm: 0 } }}>
+        <Grid container spacing={3}>
+          {/* Left Column */}
+          <Grid item xs={12} md={8}>
+            {/* Summary Section */}
+            <Card sx={{ mb: 2 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Summary</Typography>
+                <Typography><strong>Provider:</strong> {clinic.provider || 'N/A'}</Typography>
+                <Typography><strong>Specialty:</strong> {clinic.specialty || 'N/A'}</Typography>
+                {/* Add insurance logos here */}
+              </CardContent>
+            </Card>
+
+            {/* Staff Section */}
+            <Card sx={{ mb: 2 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Staff</Typography>
+                {/* Add staff members with avatars and ratings */}
+                {/* This is a placeholder, replace with actual staff data */}
+                <Grid container spacing={2}>
+                  {[1, 2, 3, 4].map((staff) => (
+                    <Grid item xs={6} key={staff}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar sx={{ mr: 2 }}>D{staff}</Avatar>
+                        <Box>
+                          <Typography variant="subtitle1">Dr. Name</Typography>
+                          <Typography variant="body2">Specialty</Typography>
+                          <Rating value={4.5} readOnly size="small" />
+                        </Box>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </CardContent>
+            </Card>
+
+            {/* Services Section */}
+            <Card sx={{ mb: 2 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Services</Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <List>
+                      <ListItem>
+                        <ListItemText primary="Primary Care" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Pediatrics" />
+                      </ListItem>
+                      {/* Add more services */}
+                    </List>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <List>
+                      <ListItem>
+                        <ListItemText primary="Dermatology" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Cardiology" />
+                      </ListItem>
+                      {/* Add more services */}
+                    </List>
+                  </Grid>
+                </Grid>
+                {/* Add service images here */}
+              </CardContent>
+            </Card>
+
+            {/* Location Section */}
+            <Card sx={{ mb: 2 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Location</Typography>
+                {/* Add map component here */}
+                <Typography>{clinic.address}</Typography>
+                <Typography>{clinic.city}, {clinic.state} {clinic.zipcode}</Typography>
+              </CardContent>
+            </Card>
+
+            {/* Reviews Section */}
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Reviews</Typography>
+                {/* Add review summary and individual reviews here */}
+              </CardContent>
+            </Card>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography><strong>Provider:</strong> {clinic.provider || 'N/A'}</Typography>
-            <Typography><strong>Specialty:</strong> {clinic.specialty || 'N/A'}</Typography>
+
+          {/* Right Column */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Book an Appointment</Typography>
+                {/* Add appointment booking form here */}
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
-      </Paper>
-      {/* You can add more sections or details here */}
-    </Box>
+      </Box>
+    </Container>
   );
 }
 
