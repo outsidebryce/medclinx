@@ -14,13 +14,12 @@ function ClinicProfile() {
         // Convert slug back to a name-like string
         const nameQuery = slug
           .split('-')
-          .map(word => word === 'and' ? '&' : word)
           .join(' ');
 
         const { data, error } = await supabase
           .from('clinics')
           .select('*')
-          .ilike('name', `%${nameQuery}%`)
+          .or(`name.ilike.%${nameQuery}%,name.ilike.%${nameQuery.replace(/\band\b/g, '&')}%`)
           .single();
 
         if (error) throw error;
