@@ -7,17 +7,20 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Box from '@mui/material/Box';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
-function Navbar({ transparent }) {
+function Navbar() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
   return (
     <AppBar 
       position="fixed" 
       color="transparent" 
-      elevation={0}
+      elevation={isHomePage ? 0 : 4}
       sx={{
-        backgroundColor: 'transparent !important',
-        boxShadow: 'none',
+        backgroundColor: isHomePage ? 'transparent !important' : 'white',
+        boxShadow: isHomePage ? 'none' : undefined,
       }}
     >
       <Toolbar>
@@ -38,7 +41,7 @@ function Navbar({ transparent }) {
           target="_blank"
           rel="noopener noreferrer"
           sx={{
-            color: 'white',
+            color: isHomePage ? 'white' : 'black',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',

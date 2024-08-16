@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress, Paper, Grid } from '@mui/material';
 
 function ClinicProfile() {
   const { slug } = useParams();
@@ -11,10 +11,7 @@ function ClinicProfile() {
   useEffect(() => {
     async function fetchClinic() {
       try {
-        // Convert slug back to a name-like string
-        const nameQuery = slug
-          .split('-')
-          .join(' ');
+        const nameQuery = slug.split('-').join(' ');
 
         const { data, error } = await supabase
           .from('clinics')
@@ -39,11 +36,21 @@ function ClinicProfile() {
 
   return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>{clinic.name}</Typography>
-      <Typography>Phone: {clinic.phone_number}</Typography>
-      <Typography>Location: {clinic.city}, {clinic.state}</Typography>
-      <Typography>Website: {clinic.website}</Typography>
-      {/* Add more clinic details here */}
+      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
+        <Typography variant="h4" gutterBottom>{clinic.name}</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <Typography><strong>Phone:</strong> {clinic.phone_number}</Typography>
+            <Typography><strong>Location:</strong> {clinic.city}, {clinic.state} {clinic.zipcode}</Typography>
+            <Typography><strong>Website:</strong> {clinic.website}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Typography><strong>Provider:</strong> {clinic.provider || 'N/A'}</Typography>
+            <Typography><strong>Specialty:</strong> {clinic.specialty || 'N/A'}</Typography>
+          </Grid>
+        </Grid>
+      </Paper>
+      {/* You can add more sections or details here */}
     </Box>
   );
 }
