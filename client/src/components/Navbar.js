@@ -6,11 +6,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { InputBase, Paper, useTheme, useMediaQuery } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -70,6 +69,8 @@ function Navbar() {
     }
   };
 
+  const showSearchBar = !isHomePage && (!isMobile || (isMobile && location.pathname === '/clinics'));
+
   return (
     <AppBar 
       position="fixed" 
@@ -109,7 +110,7 @@ function Navbar() {
             />
           </RouterLink>
 
-          {!isHomePage && !isMobile && (
+          {showSearchBar && (
             <Paper
               component="form"
               sx={{ 

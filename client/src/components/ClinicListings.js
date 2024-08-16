@@ -15,6 +15,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import NatureIcon from '@mui/icons-material/Nature';
+import MapButton from './MapButton';
 
 function ClinicListings() {
   const [clinics, setClinics] = useState([]);
@@ -297,6 +298,7 @@ function ClinicListings() {
           ))
         )}
       </Container>
+      <MapButton visible={true} />
     </>
   );
 }

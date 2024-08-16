@@ -9,6 +9,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
 import MessageIcon from '@mui/icons-material/Message';
+import MapButton from './MapButton';
 
 function ClinicProfile() {
   const { slug } = useParams();
@@ -249,6 +250,7 @@ function ClinicProfile() {
           </Grid>
         </Grid>
       </Box>
+      <MapButton />
     </Container>
   );
 }
