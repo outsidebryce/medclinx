@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { 
@@ -17,6 +17,7 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import NatureIcon from '@mui/icons-material/Nature';
 import MapButton from './MapButton';
 import LightboxClinicProfile from './LightboxClinicProfile';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 function ClinicListings() {
   const [clinics, setClinics] = useState([]);
@@ -28,6 +29,27 @@ function ClinicListings() {
   const [selectedClinicSlug, setSelectedClinicSlug] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [map, setMap] = useState(null);
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: "AIzaSyBWn5db8MsTl0wqxeVNIBufElLrbPSsrgU" // Replace with your actual API key
+  });
+
+  const mapCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
+
+  const onLoad = useCallback(function callback(map) {
+    const bounds = new window.google.maps.LatLngBounds(mapCenter);
+    map.fitBounds(bounds);
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
+  const isValidCoordinate = (lat, lng) => {
+    return typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -140,8 +162,8 @@ function ClinicListings() {
         sx={{ 
           position: 'fixed', 
           top: {
-            xs: '56px', // Mobile navbar height
-            sm: '64px'  // Desktop navbar height
+            xs: '56px',
+            sm: '64px'
           },
           left: 0,
           right: 0,
@@ -154,11 +176,11 @@ function ClinicListings() {
             sm: '0px 16px 16px 16px'
           },
           overflowX: 'auto',
-          scrollbarWidth: 'none', // Hide scrollbar for Firefox
-          '&::-webkit-scrollbar': { // Hide scrollbar for Chrome, Safari, and Opera
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': {
             display: 'none'
           },
-          '-ms-overflow-style': 'none', // Hide scrollbar for IE and Edge
+          '-ms-overflow-style': 'none',
         }}
       >
         <ToggleButtonGroup
@@ -173,8 +195,8 @@ function ClinicListings() {
               flex: '1 0 auto',
               whiteSpace: 'nowrap',
               minWidth: {
-                xs: '110px', // Fixed width on mobile
-                sm: 'auto'   // Auto width on larger screens
+                xs: '110px',
+                sm: 'auto'
               },
             },
           }}
@@ -214,111 +236,155 @@ function ClinicListings() {
       </Box>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ maxWidth: '1160px !important', mt: '100px', py: 3 }}>
-        {/* Filtered Listings Count */}
-        <Typography variant="subtitle1" gutterBottom>
-          Showing {filteredClinics.length} {filteredClinics.length === 1 ? 'clinic' : 'clinics'}
-        </Typography>
+      <Container 
+        maxWidth={false} 
+        sx={{ 
+          mt: '100px', 
+          height: 'calc(100vh - 100px)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Grid container spacing={3} sx={{ flexGrow: 1, height: '100%' }}>
+          {/* Clinic Listings */}
+          <Grid item xs={12} md={6} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Showing {filteredClinics.length} {filteredClinics.length === 1 ? 'clinic' : 'clinics'}
+            </Typography>
 
-        {filteredClinics.length === 0 ? (
-          <Typography>No clinics found.</Typography>
-        ) : (
-          filteredClinics.map(clinic => (
-            <Card key={clinic.id} sx={{ mb: 2, display: 'flex', position: 'relative' }}>
-              {clinic.logo && (
-                <Box sx={{ 
-                  padding: { xs: '5px', sm: '10px' },
-                  border: 'solid 1px rgba(0, 0, 0, .2)',
-                  margin: { 
-                    xs: '20px 5px 5px 20px', 
-                    sm: '10px'
-                  },
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: { xs: 60, sm: 120 },
-                  height: { xs: 60, sm: 120 },
-                  flexShrink: 0,
-                }}>
-                  <CardMedia
-                    component="img"
-                    sx={{ 
-                      width: { xs: 50, sm: 100 }, 
-                      height: { xs: 50, sm: 100 }, 
-                      objectFit: 'contain'
-                    }}
-                    image={clinic.logo}
-                    alt={`${clinic.name} logo`}
-                    onError={(e) => { e.target.style.display = 'none' }}
-                  />
-                </Box>
-              )}
-              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <Grid container spacing={2} alignItems="flex-start">
-                  <Grid item xs={12} sm={8}>
-                    <Typography variant="h5" component="div" gutterBottom>
-                      <Link 
-                        to={`/clinic/${createSlug(clinic.name)}`}
-                        onClick={(e) => handleClinicClick(clinic.name, e)}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                      >
-                        {clinic.name}
-                      </Link>
-                    </Typography>
-                    <Typography color="text.secondary" gutterBottom>
-                      {clinic.city}, {clinic.state}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 1 }}>
-                      {clinic.provider && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar sx={{ width: 24, height: 24, mr: 1 }}>
-                            <PersonIcon fontSize="small" />
-                          </Avatar>
-                          <Typography variant="body2">{clinic.provider}</Typography>
-                        </Box>
-                      )}
-                      {clinic.phone_number && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <IconButton size="small" sx={{ mr: 1, p: 0 }}>
-                            <PhoneIcon fontSize="small" />
-                          </IconButton>
-                          <Typography variant="body2">{clinic.phone_number}</Typography>
-                        </Box>
-                      )}
-                      {clinic.specialty && (
-                        <Chip 
-                          label={clinic.specialty} 
-                          color="primary" 
-                          size="small" 
-                        />
-                      )}
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button 
-                      onClick={(e) => handleClinicClick(clinic.name, e)}
-                      variant="outlined"
-                      sx={{
-                        backgroundColor: 'white',
-                        color: '#333333', // Charcoal color
-                        borderColor: 'grey.300',
-                        textTransform: 'none',
-                        boxShadow: 'none',
-                        '&:hover': {
-                          backgroundColor: 'grey.100',
-                          borderColor: 'grey.400',
+            <Box sx={{ 
+              flexGrow: 1, 
+              overflowY: 'auto', 
+              pr: { xs: 0, sm: 2 },  // Remove right padding on mobile, keep it for larger screens
+              pl: { xs: 0, sm: 0 },  // Remove left padding on all screen sizes
+            }}>
+              {filteredClinics.length === 0 ? (
+                <Typography>No clinics found.</Typography>
+              ) : (
+                filteredClinics.map(clinic => (
+                  <Card key={clinic.id} sx={{ mb: 2, display: 'flex', position: 'relative' }}>
+                    {clinic.logo && (
+                      <Box sx={{ 
+                        padding: { xs: '5px', sm: '10px' },
+                        border: 'solid 1px rgba(0, 0, 0, .2)',
+                        margin: { 
+                          xs: '20px 5px 5px 20px', 
+                          sm: '10px'
                         },
-                      }}
-                    >
-                      View Profile
-                    </Button>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          ))
-        )}
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: { xs: 60, sm: 120 },
+                        height: { xs: 60, sm: 120 },
+                        flexShrink: 0,
+                      }}>
+                        <CardMedia
+                          component="img"
+                          sx={{ 
+                            width: { xs: 50, sm: 100 }, 
+                            height: { xs: 50, sm: 100 }, 
+                            objectFit: 'contain'
+                          }}
+                          image={clinic.logo}
+                          alt={`${clinic.name} logo`}
+                          onError={(e) => { e.target.style.display = 'none' }}
+                        />
+                      </Box>
+                    )}
+                    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Grid container spacing={2} alignItems="flex-start">
+                        <Grid item xs={12} sm={8}>
+                          <Typography variant="h5" component="div" gutterBottom>
+                            <Link 
+                              to={`/clinic/${createSlug(clinic.name)}`}
+                              onClick={(e) => handleClinicClick(clinic.name, e)}
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {clinic.name}
+                            </Link>
+                          </Typography>
+                          <Typography color="text.secondary" gutterBottom>
+                            {clinic.city}, {clinic.state}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 1 }}>
+                            {clinic.provider && (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Avatar sx={{ width: 24, height: 24, mr: 1 }}>
+                                  <PersonIcon fontSize="small" />
+                                </Avatar>
+                                <Typography variant="body2">{clinic.provider}</Typography>
+                              </Box>
+                            )}
+                            {clinic.phone_number && (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <IconButton size="small" sx={{ mr: 1, p: 0 }}>
+                                  <PhoneIcon fontSize="small" />
+                                </IconButton>
+                                <Typography variant="body2">{clinic.phone_number}</Typography>
+                              </Box>
+                            )}
+                            {clinic.specialty && (
+                              <Chip 
+                                label={clinic.specialty} 
+                                color="primary" 
+                                size="small" 
+                              />
+                            )}
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <Button 
+                            onClick={(e) => handleClinicClick(clinic.name, e)}
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: 'white',
+                              color: '#333333',
+                              borderColor: 'grey.300',
+                              textTransform: 'none',
+                              boxShadow: 'none',
+                              '&:hover': {
+                                backgroundColor: 'grey.100',
+                                borderColor: 'grey.400',
+                              },
+                            }}
+                          >
+                            View Profile
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </Box>
+          </Grid>
+
+          {/* Google Map */}
+          <Grid item xs={12} md={6} sx={{ height: '100%' }}>
+            {isLoaded ? (
+              <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={mapCenter}
+                zoom={10}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
+              >
+                {filteredClinics
+                  .filter(clinic => isValidCoordinate(clinic.latitude, clinic.longitude))
+                  .map(clinic => (
+                    <Marker
+                      key={clinic.id}
+                      position={{ lat: Number(clinic.latitude), lng: Number(clinic.longitude) }}
+                      title={clinic.name}
+                    />
+                  ))}
+              </GoogleMap>
+            ) : (
+              <Typography>Loading map...</Typography>
+            )}
+          </Grid>
+        </Grid>
       </Container>
       <MapButton visible={true} />
       <LightboxClinicProfile

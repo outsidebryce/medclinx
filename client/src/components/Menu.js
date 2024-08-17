@@ -98,7 +98,15 @@ const Menu = ({ isOpen, onClose }) => {
           transition: 'transform 200ms ease-in-out',
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <img 
+            src="/medclinx-logo.svg" 
+            alt="MedClinx Logo" 
+            style={{ 
+              maxHeight: '30px', 
+              width: 'auto'
+            }}
+          />
           <IconButton onClick={onClose} aria-label="close menu">
             <CloseIcon />
           </IconButton>
