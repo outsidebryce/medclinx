@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import ClinicListings from './components/ClinicListings';
 import ClinicProfile from './components/ClinicProfile';
+import KommunicateChat from './components/KommunicateChat';
 
 const theme = createTheme({
   palette: {
@@ -34,6 +35,7 @@ function App() {
             <Route path="/clinic/:slug" element={<ClinicListings />} />
             <Route path="/clinic-page/:slug" element={<ClinicProfile />} />
           </Routes>
+          <KommunicateChat />
         </Box>
       </Router>
     </ThemeProvider>
