@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { 
   Box, Typography, Card, CardContent, Button, CardMedia, Container, 
@@ -16,6 +16,7 @@ import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import NatureIcon from '@mui/icons-material/Nature';
 import MapButton from './MapButton';
+import LightboxClinicProfile from './LightboxClinicProfile';
 
 function ClinicListings() {
   const [clinics, setClinics] = useState([]);
@@ -23,6 +24,10 @@ function ClinicListings() {
   const [specialties, setSpecialties] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
   const filterBarRef = useRef(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedClinicSlug, setSelectedClinicSlug] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -62,6 +67,17 @@ function ClinicListings() {
     };
   }, []);
 
+  useEffect(() => {
+    const match = location.pathname.match(/^\/clinic\/(.+)/);
+    if (match) {
+      setSelectedClinicSlug(match[1]);
+      setLightboxOpen(true);
+    } else if (location.pathname === '/clinics') {
+      setLightboxOpen(false);
+      setSelectedClinicSlug(null);
+    }
+  }, [location]);
+
   const specialtyIcons = {
     'All': <LocalHospitalIcon />,
     'Specialized': <MedicalServicesIcon />,
@@ -88,20 +104,30 @@ function ClinicListings() {
     }
   };
 
+  const createSlug = (name) => {
+    return encodeURIComponent(name.toLowerCase().replace(/\s+/g, '-'));
+  };
+
+  const handleClinicClick = (clinicName, event) => {
+    event.preventDefault(); // Prevent the default link behavior
+    const slug = createSlug(clinicName);
+    setSelectedClinicSlug(slug);
+    setLightboxOpen(true);
+    navigate(`/clinic/${slug}`, { replace: false });
+  };
+
+  const handleLightboxClose = () => {
+    setLightboxOpen(false);
+    setSelectedClinicSlug(null);
+    navigate('/clinics', { replace: true });
+  };
+
   const filteredClinics = selectedSpecialty === 'All' 
     ? clinics 
     : clinics.filter(clinic => clinic.specialty === selectedSpecialty);
 
   const toTitleCase = (str) => {
     return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-  };
-
-  const createSlug = (name) => {
-    return name
-      .toLowerCase()
-      .replace(/&/g, 'and')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
   };
 
   if (error) return <Box><Typography color="error">Error: {error}</Typography></Box>;
@@ -234,8 +260,7 @@ function ClinicListings() {
                     <Typography variant="h5" component="div" gutterBottom>
                       <Link 
                         to={`/clinic/${createSlug(clinic.name)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={(e) => handleClinicClick(clinic.name, e)}
                         style={{ textDecoration: 'none', color: 'inherit' }}
                       >
                         {clinic.name}
@@ -272,10 +297,7 @@ function ClinicListings() {
                   </Grid>
                   <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button 
-                      component={Link} 
-                      to={`/clinic/${createSlug(clinic.name)}`} 
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={(e) => handleClinicClick(clinic.name, e)}
                       variant="outlined"
                       sx={{
                         backgroundColor: 'white',
@@ -299,6 +321,11 @@ function ClinicListings() {
         )}
       </Container>
       <MapButton visible={true} />
+      <LightboxClinicProfile
+        isOpen={lightboxOpen}
+        onClose={handleLightboxClose}
+        clinicSlug={selectedClinicSlug}
+      />
     </>
   );
 }

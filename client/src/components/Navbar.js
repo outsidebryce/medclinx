@@ -124,13 +124,6 @@ function Navbar() {
     setInsuranceValue(event.target.value);
   };
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    if (searchValue.trim() || cityValue.trim() || insuranceValue.trim()) {
-      navigate(`/clinics?search=${encodeURIComponent(searchValue.trim())}&city=${encodeURIComponent(cityValue.trim())}&insurance=${encodeURIComponent(insuranceValue.trim())}`);
-    }
-  };
-
   const handleMenuOpen = () => {
     setIsMenuOpen(true);
   };

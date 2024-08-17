@@ -1,0 +1,12 @@
+import React from 'react';
+import { Box } from '@mui/material';
+
+const LightboxWrapper = ({ children }) => {
+  return (
+    <Box sx={{ px: 3, py: 2, height: '100%', overflow: 'auto' }}>
+      {children}
+    </Box>
+  );
+};
+
+export default LightboxWrapper;

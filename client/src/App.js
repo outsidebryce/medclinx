@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import ClinicListings from './components/ClinicListings';
@@ -31,7 +31,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/clinics" element={<ClinicListings />} />
-            <Route path="/clinic/:slug" element={<ClinicProfile />} />
+            <Route path="/clinic/:slug" element={<ClinicListings />} />
+            <Route path="/clinic-page/:slug" element={<ClinicProfile />} />
           </Routes>
         </Box>
       </Router>

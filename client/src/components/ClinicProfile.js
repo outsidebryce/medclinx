@@ -2,24 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { 
-  Box, Typography, CircularProgress, Paper, Grid, Container, 
-  Button, Avatar, Card, CardContent, Divider, Rating, List, ListItem, ListItemText,
+  Box, Typography, CircularProgress, Grid, Container, 
+  Button, Avatar, Card, CardContent, Rating, List, ListItem, ListItemText,
   useTheme, useMediaQuery
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ShareIcon from '@mui/icons-material/Share';
 import MessageIcon from '@mui/icons-material/Message';
-import MapButton from './MapButton';
 
-function ClinicProfile() {
-  const { slug } = useParams();
+function ClinicProfile({ slug: propSlug, isLightbox = false }) {
+  const { slug: paramSlug } = useParams();
+  const slug = propSlug || paramSlug;
   const [clinic, setClinic] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     async function fetchClinic() {
+      if (!slug) {
+        setError('No clinic slug provided');
+        setLoading(false);
+        return;
+      }
+
       try {
         const nameQuery = slug.split('-').join(' ');
 
@@ -35,23 +42,26 @@ function ClinicProfile() {
       } catch (error) {
         console.error('Error fetching clinic:', error);
         setError('Failed to fetch clinic details');
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchClinic();
   }, [slug]);
 
-  if (error) return <Box><Typography color="error">Error: {error}</Typography></Box>;
-  if (!clinic) return <Box><CircularProgress /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><CircularProgress /></Box>;
+  if (error) return <Box sx={{ p: 3 }}><Typography color="error">Error: {error}</Typography></Box>;
+  if (!clinic) return <Box sx={{ p: 3 }}><Typography>Clinic not found</Typography></Box>;
 
   return (
     <Container 
       maxWidth="lg" 
+      disableGutters={isLightbox}
       sx={{ 
-        mt: { xs: 0, sm: '20px' }, 
-        px: { xs: 0, sm: 2 },
-        bgcolor: '#FAFAFA',
-        minHeight: '100vh'
+        mt: isLightbox ? 0 : { xs: 0, sm: '20px' }, 
+        px: isLightbox ? 0 : { xs: 0, sm: 2 },
+        height: '100%',
       }}
     >
       {/* Header */}
@@ -61,29 +71,17 @@ function ClinicProfile() {
         p: 2, 
         mb: 2, 
         position: 'relative',
-        borderRadius: { xs: 0, sm: '4px' }  // Add border radius for desktop
+        borderRadius: isLightbox ? 0 : { xs: 0, sm: '4px' }
       }}>
-        <Button 
-          component={Link} 
-          to="/clinics" 
-          startIcon={<ArrowBackIcon />} 
-          color="inherit"
-          sx={{ textTransform: 'capitalize' }}
-        >
-          Back
-        </Button>
-        {isMobile && (
+        {!isLightbox && (
           <Button 
-            startIcon={<ShareIcon />} 
+            component={Link} 
+            to="/clinics" 
+            startIcon={<ArrowBackIcon />} 
             color="inherit"
-            sx={{ 
-              textTransform: 'capitalize',
-              position: 'absolute',
-              top: 16,
-              right: 16
-            }}
+            sx={{ textTransform: 'capitalize' }}
           >
-            Share
+            Back
           </Button>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
@@ -151,7 +149,7 @@ function ClinicProfile() {
       </Box>
 
       {/* Content below header */}
-      <Box sx={{ px: { xs: '20px', sm: 0 } }}>
+      <Box sx={{ px: isLightbox ? 3 : 0, pb: isLightbox ? 3 : 0 }}>
         <Grid container spacing={3}>
           {/* Left Column */}
           <Grid item xs={12} md={8}>
@@ -250,7 +248,6 @@ function ClinicProfile() {
           </Grid>
         </Grid>
       </Box>
-      <MapButton />
     </Container>
   );
 }
