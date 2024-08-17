@@ -18,6 +18,8 @@ import NatureIcon from '@mui/icons-material/Nature';
 import MapButton from './MapButton';
 import LightboxClinicProfile from './LightboxClinicProfile';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 function ClinicListings() {
   const [clinics, setClinics] = useState([]);
@@ -34,6 +36,7 @@ function ClinicListings() {
     id: 'google-map-script',
     googleMapsApiKey: "AIzaSyBWn5db8MsTl0wqxeVNIBufElLrbPSsrgU" // Replace with your actual API key
   });
+  const [favorites, setFavorites] = useState([]);
 
   const mapCenter = { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
 
@@ -99,6 +102,24 @@ function ClinicListings() {
       setSelectedClinicSlug(null);
     }
   }, [location]);
+
+  useEffect(() => {
+    // Load favorites from localStorage when component mounts
+    const storedFavorites = JSON.parse(localStorage.getItem('favoriteClinics') || '[]');
+    setFavorites(storedFavorites);
+  }, []);
+
+  const toggleFavorite = (clinicId) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = prevFavorites.includes(clinicId)
+        ? prevFavorites.filter(id => id !== clinicId)
+        : [...prevFavorites, clinicId];
+      
+      // Save updated favorites to localStorage
+      localStorage.setItem('favoriteClinics', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
 
   const specialtyIcons = {
     'All': <LocalHospitalIcon />,
@@ -333,7 +354,25 @@ function ClinicListings() {
                             )}
                           </Box>
                         </Grid>
-                        <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                          <IconButton
+                            onClick={() => toggleFavorite(clinic.id)}
+                            sx={{
+                              mr: 1,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '4px',
+                              padding: '6px',
+                              '&:hover': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                              },
+                            }}
+                          >
+                            {favorites.includes(clinic.id) ? (
+                              <FavoriteIcon sx={{ color: 'red' }} />
+                            ) : (
+                              <FavoriteBorderIcon sx={{ color: 'red' }} />
+                            )}
+                          </IconButton>
                           <Button 
                             onClick={(e) => handleClinicClick(clinic.name, e)}
                             variant="outlined"
