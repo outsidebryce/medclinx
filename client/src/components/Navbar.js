@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, Link as RouterLink } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
@@ -13,6 +12,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import { styled, alpha } from '@mui/material/styles';
 import usePreventBodyScroll from '../hooks/usePreventBodyScroll';
+import Menu from './Menu';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -100,7 +100,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 }));
 
 function Navbar() {
-  usePreventBodyScroll(); // Add this line
+  usePreventBodyScroll();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -108,6 +108,7 @@ function Navbar() {
   const [searchValue, setSearchValue] = useState('');
   const [cityValue, setCityValue] = useState('');
   const [insuranceValue, setInsuranceValue] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -130,136 +131,137 @@ function Navbar() {
     }
   };
 
+  const handleMenuOpen = () => {
+    setIsMenuOpen(true);
+  };
+
+  const handleMenuClose = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
-    <AppBar 
-      position="fixed" 
-      color="transparent" 
-      elevation={0}
-      sx={{
-        backgroundColor: isHomePage ? 'transparent !important' : 'white',
-        boxShadow: isHomePage 
-          ? 'none' 
-          : '0 2px 4px -1px rgba(0,0,0,0.06), 0 4px 6px -1px rgba(0,0,0,0.1)',
-      }}
-    >
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <RouterLink to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-          <img 
-            src="/medclinx-logo.svg" 
-            alt="MedClinx Logo" 
-            style={{ 
-              maxHeight: '30px', 
-              width: 'auto'
-            }}
-          />
-        </RouterLink>
+    <>
+      <AppBar 
+        position="fixed" 
+        color="transparent" 
+        elevation={0}
+        sx={{
+          backgroundColor: isHomePage ? 'transparent !important' : 'white',
+          boxShadow: isHomePage 
+            ? 'none' 
+            : '0 2px 4px -1px rgba(0,0,0,0.06), 0 4px 6px -1px rgba(0,0,0,0.1)',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <RouterLink to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+            <img 
+              src="/medclinx-logo.svg" 
+              alt="MedClinx Logo" 
+              style={{ 
+                maxHeight: '30px', 
+                width: 'auto'
+              }}
+            />
+          </RouterLink>
 
-        {!isMobile && !isHomePage && (
-          <Box sx={{ position: 'relative', flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ 'aria-label': 'search' }}
-                value={searchValue}
-                onChange={handleSearchChange}
-              />
-              <Divider />
-              <LocationOnIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
-              <StyledInputBase
-                placeholder="City"
-                inputProps={{ 'aria-label': 'city' }}
-                value={cityValue}
-                onChange={handleCityChange}
-              />
-              <Divider />
-              <LocalHospitalIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
-              <StyledSelect
-                value={insuranceValue}
-                onChange={handleInsuranceChange}
-                displayEmpty
-                inputProps={{ 'aria-label': 'insurance' }}
-                MenuProps={{
-                  anchorOrigin: {
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  },
-                  transformOrigin: {
-                    vertical: 'top',
-                    horizontal: 'left',
-                  },
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                      width: 250,
+          {!isMobile && !isHomePage && (
+            <Box sx={{ position: 'relative', flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search…"
+                  inputProps={{ 'aria-label': 'search' }}
+                  value={searchValue}
+                  onChange={handleSearchChange}
+                />
+                <Divider />
+                <LocationOnIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
+                <StyledInputBase
+                  placeholder="City"
+                  inputProps={{ 'aria-label': 'city' }}
+                  value={cityValue}
+                  onChange={handleCityChange}
+                />
+                <Divider />
+                <LocalHospitalIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
+                <StyledSelect
+                  value={insuranceValue}
+                  onChange={handleInsuranceChange}
+                  displayEmpty
+                  inputProps={{ 'aria-label': 'insurance' }}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
                     },
-                  },
-                  disableScrollLock: true, // Add this line
-                }}
-                sx={{ 
-                  minWidth: 120,
-                }}
-              >
-                <MenuItem value="">
-                  <em>Insurance</em>
-                </MenuItem>
-                <MenuItem value="medicare">Medicare</MenuItem>
-                <MenuItem value="medicaid">Medicaid</MenuItem>
-                <MenuItem value="private">Private</MenuItem>
-              </StyledSelect>
-            </Search>
-          </Box>
-        )}
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        width: 250,
+                      },
+                    },
+                    disableScrollLock: true,
+                  }}
+                  sx={{ 
+                    minWidth: 120,
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Insurance</em>
+                  </MenuItem>
+                  <MenuItem value="medicare">Medicare</MenuItem>
+                  <MenuItem value="medicaid">Medicaid</MenuItem>
+                  <MenuItem value="private">Private</MenuItem>
+                </StyledSelect>
+              </Search>
+            </Box>
+          )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Link
-            href="https://example.com/for-clinics"
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              color: isHomePage ? 'white' : 'black',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              marginRight: 2,
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          >
-            For Clinics
-          </Link>
-          <Box
-            sx={{
-              backgroundColor: 'white',
-              borderRadius: '20px',
-              display: 'flex',
-              padding: '4px 8px',
-              '&:hover': {
-                backgroundColor: '#f5f5f5',
-              },
-            }}
-          >
-            <IconButton
-              size="small"
-              aria-label="menu"
-              sx={{ color: '#080808', padding: '4px' }}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Link
+              href="https://example.com/for-clinics"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: isHomePage ? 'white' : 'black',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                marginRight: 2,
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
             >
-              <MenuIcon />
-            </IconButton>
-            <IconButton
-              size="small"
-              aria-label="profile"
-              sx={{ color: '#080808', padding: '4px' }}
+              For Clinics
+            </Link>
+            <Box
+              onClick={handleMenuOpen}
+              sx={{
+                backgroundColor: 'white',
+                borderRadius: '20px',
+                display: 'flex',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+              }}
             >
-              <AccountCircleIcon />
-            </IconButton>
+              <MenuIcon sx={{ color: '#080808', margin: '4px' }} />
+              <AccountCircleIcon sx={{ color: '#080808', margin: '4px' }} />
+            </Box>
           </Box>
-        </Box>
-      </Toolbar>
-    </AppBar>
+        </Toolbar>
+      </AppBar>
+      <Menu isOpen={isMenuOpen} onClose={handleMenuClose} />
+    </>
   );
 }
 
